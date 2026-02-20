@@ -55,7 +55,7 @@ const PedidoSchema = new Schema(
 
     status: {
       type: String,
-      enum: ["pendiente", "atendido"],
+      enum: ["pendiente", "en_ruta", "atendido"],
       default: "pendiente",
     },
   },

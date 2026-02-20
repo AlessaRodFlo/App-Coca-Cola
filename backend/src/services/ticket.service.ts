@@ -1,5 +1,4 @@
 import Pedido from "../models/Pedido";
-import { Client } from "../models/Cliente";
 
 /* ===============================
    GENERAR TICKET EN TEXTO
@@ -7,19 +6,18 @@ import { Client } from "../models/Cliente";
 export const generateTicketText = async (pedidoId: string): Promise<string> => {
   const pedido = await Pedido.findById(pedidoId).populate("client");
 
-  if (!pedido) {
-    throw new Error("Pedido no encontrado");
-  }
+  if (!pedido) throw new Error("Pedido no encontrado");
 
-  const client = pedido.client as any;
+  const client = (pedido.client as any) || null;
 
   let ticket = "";
   ticket += "PREVENTA COCA-COLA\n";
   ticket += "========================\n";
-  ticket += `Cliente: ${client.name}\n`;
-  ticket += `Correo: ${client.email}\n`;
+  ticket += `Cliente: ${client?.nombre ?? "(sin registrar)"}\n`;
+  ticket += `Correo: ${client?.correo ?? "(sin correo)"}\n`;
   ticket += `Pedido ID: ${pedido._id}\n`;
-  ticket += `Fecha: ${pedido.createdAt.toLocaleString()}\n`;
+  ticket += `Fecha de creación: ${pedido.createdAt.toLocaleString()}\n`;
+  ticket += `Última actualización: ${pedido.updatedAt.toLocaleString()}\n`;
   ticket += "------------------------\n";
 
   pedido.items.forEach((item: any) => {
@@ -41,11 +39,9 @@ export const generateTicketText = async (pedidoId: string): Promise<string> => {
 export const generateTicketHTML = async (pedidoId: string): Promise<string> => {
   const pedido = await Pedido.findById(pedidoId).populate("client");
 
-  if (!pedido) {
-    throw new Error("Pedido no encontrado");
-  }
+  if (!pedido) throw new Error("Pedido no encontrado");
 
-  const client = pedido.client as any;
+  const client = (pedido.client as any) || null;
 
   const rows = pedido.items
     .map(
@@ -63,10 +59,11 @@ export const generateTicketHTML = async (pedidoId: string): Promise<string> => {
   return `
     <div style="font-family: Arial, sans-serif;">
       <h2>Ticket Coca-Cola</h2>
-      <p><strong>Cliente:</strong> ${client.name}</p>
-      <p><strong>Correo:</strong> ${client.email}</p>
+      <p><strong>Cliente:</strong> ${client?.nombre ?? "(sin registrar)"}</p>
+      <p><strong>Correo:</strong> ${client?.correo ?? "(sin correo)"}</p>
       <p><strong>Pedido ID:</strong> ${pedido._id}</p>
-      <p><strong>Fecha:</strong> ${pedido.createdAt.toLocaleString()}</p>
+      <p><strong>Fecha de creación:</strong> ${pedido.createdAt.toLocaleString()}</p>
+      <p><strong>Última actualización:</strong> ${pedido.updatedAt.toLocaleString()}</p>
 
       <table border="1" cellpadding="8" cellspacing="0" width="100%">
         <thead>
